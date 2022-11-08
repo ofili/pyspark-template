@@ -1,0 +1,4 @@
+{
+  "input_path": "../resources/data/usage_stat.csv",
+  "output_path": "../resources/data/"
+}
