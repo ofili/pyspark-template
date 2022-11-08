@@ -20,14 +20,11 @@ else:
 
 
 def get_config(path, job):
-    try:
-        filepath = f"{path}/{job}/resources/configs/config.json"
-        with open(filepath, encoding='utf-8') as json_file:
-            config = json.loads(json_file.read())
-        config['relative_path'] = path
-        return config
-    except FileNotFoundError:
-        raise FileNotFoundError("file not found")
+    filepath = f"{path}/{job}/resources/configs/config.json"
+    with open(filepath, encoding='utf-8') as json_file:
+        config = json.loads(json_file.read())
+    config['relative_path'] = path
+    return config
 
 
 def parse_job_args(job_args) -> Dict:
@@ -49,7 +46,6 @@ if __name__ == '__main__':
         usage="""--job wordcount --job-args libs=libs.zip dep=jobs.zip"""
     )
     parser.add_argument('--job', help='job name', dest='job_name', required=True)
-    # parser.add_argument('--conf-file', help='Config file path', required=False)
     parser.add_argument('--job-args', help='Dynamic job arguments', required=False, nargs='*')
 
     args = parser.parse_args()
@@ -57,9 +53,6 @@ if __name__ == '__main__':
 
     job_name = args.job_name
     spark, log = create_spark_session(job_name)
-
-    # config_file = args.conf_file if args.conf_file else "src/jobs/resources/configs/config.json"
-    # config_dict = get_config(config_file)
 
     environment = {
         'PYSPARK_JOB_ARGS': ' '.join(args.job_args) if args.job_args else ''
