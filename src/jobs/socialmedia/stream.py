@@ -16,9 +16,8 @@ def extract(spark: SparkSession, config: Dict, logger) -> DataFrame:
     )
     logger.info("Reading data")
     data = (
-        spark.read.csv(config.get("input_path"), schema=schema)
+        spark.readStream.csv(config.get("input_path"), schema=schema)
     )
-
     return data
 
 
@@ -52,19 +51,16 @@ def join_df(spark, data_df):
 
 def filter_fb_data(spark: SparkSession, df: DataFrame, config: Dict):
     fb_data = df.filter(df['app'] == 'FB')
-    fb_avg_time = (
-        fb_data
-        .groupBy('user_id')
-        .agg(f.avg('time_spent_in_seconds'))
-    )
-    checkpoint = config.get("checkpoint")
+    fb_avg_time = fb_data.groupBy('user_id').agg(f.avg('time_spent_in_seconds'))
     fb_query = (
-        fb_avg_time.write
-        .format('parquet')
-        .mode("overwrite")
-        .save(checkpoint)
-        # .option("path", config.get("output_path"))
+        fb_avg_time.writeStream.
+        queryName('fb_query')
+        .outputMode('complete')
+        .format('memory')
+        .option("path", config["output_path"])
+        .start()
     )
+    spark.sql("select * from fb_query").toPandas()
 
 
 def run(spark, config, logger):

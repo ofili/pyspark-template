@@ -26,7 +26,7 @@ def get_config(filename: str) -> Dict:
             return config
     except FileNotFoundError:
         raise FileNotFoundError("%s not found" % filename)
-    
+
 
 def parse_job_args(job_args: str) -> Dict:
     return {a.split('=')[0]: a.split('=')[1] for a in job_args}
@@ -50,7 +50,7 @@ if __name__ == '__main__':
                         help='The name of the spark job you want to run')
     parser.add_argument('--conf-file', required=False, help='Path to config file')
     parser.add_argument('--job-args', type=str, nargs="*",
-                        help='Path to the jobs resources',)
+                        help='Path to the jobs resources', )
 
     args = parser.parse_args()
     print("Called arguments: %s" % args)
@@ -58,10 +58,10 @@ if __name__ == '__main__':
     job_name = args.job_name
     log: Any
     spark, log = create_spark_session(job_name)
-    
-    config_file: Any = args.conf_file if args.conf_file else '/spark-streaming/src/jobs/resources/configs/config.json'
+
+    config_file: Any = args.conf_file if args.conf_file else 'C:/Users/ofili/Documents/Projects/spark-streaming/src/jobs/resources/configs/config.json'
     config_dict = get_config(config_file)
-    
+
     if args.job_args:
         job_args = parse_job_args(args.job_args)
         config_dict.update(job_args)
@@ -71,5 +71,5 @@ if __name__ == '__main__':
     module_name = f"jobs.{args.job_name}.{args.job_name}"
     module = importlib.import_module('jobs.socialmedia.%s' % args.job_name)
     res = module.run(spark, config_dict, log)
-    
+
     print(f'[JOB {args.job_name} RESULT]: {res}')
