@@ -59,7 +59,7 @@ if __name__ == '__main__':
     log: Any
     spark, log = create_spark_session(job_name)
 
-    config_file: Any = args.conf_file if args.conf_file else 'C:/Users/ofili/Documents/Projects/spark-streaming/src/jobs/resources/configs/config.json'
+    config_file: Any = args.conf_file if args.conf_file else 'path_to_config.json'
     config_dict = get_config(config_file)
 
     if args.job_args:

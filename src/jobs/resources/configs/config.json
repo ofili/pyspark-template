@@ -1,5 +1,5 @@
 {
-  "input_path": "C:/Users/ofili/Documents/Projects/spark-streaming/src/jobs/resources/data/usage_stat.csv",
-  "output_path": "C:/Users/ofili/Documents/Projects/spark-streaming/src/jobs/resources/data/",
-  "checkpoint": "C:/Users/ofili/Documents/Projects/spark-streaming/src/jobs/resources/data/checkpoint"
+  "input_path": "path_to_usage_stat.csv",
+  "output_path": "path_to_output",
+  "checkpoint": "path_to_checkpoint"
 }
