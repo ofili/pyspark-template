@@ -16,27 +16,60 @@ def extract(spark: SparkSession, config: Dict, logger) -> DataFrame:
     )
     logger.info("Reading data")
     data = (
-        spark.readStream.csv(config["relative_path"] + config["input_path"], schema=schema)
+        spark.read.csv(config.get("input_path"), schema=schema)
     )
+
     return data
+
+
+def join_df(spark, data_df):
+    app_df = spark.createDataFrame(
+        [
+            ('FB', 'Facebook'), ('Insta', 'Instagram'), ('Twitter', 'Twitter'),
+            ('WA', 'WhatsApp'), ('TikTok', 'TikTok'), ('Sig', 'Signal'),
+            ('BSky', 'Bluesky'), ('Snap', 'Snapchat')
+        ],
+        ['app', 'app_name']
+    )
+    df = data_df.join(app_df, 'app')
+
+    df.createOrReplaceTempView("smTable")
+
+    total_time_spent = spark.sql("select app, sum(time_spent_in_seconds) time_spent_in_seconds from smTable "
+                                 "where app is not null group by app "
+                                 "order by time_spent_in_seconds desc")
+    total_time_spent.show()
+
+    avg_time_spent = spark.sql(
+        "select app, avg(time_spent_in_seconds) avg_time_spent_in_seconds from smTable "
+        "where app is not null group by app "
+        "order by time_spent_in_seconds desc"
+    )
+    avg_time_spent.show()
+
+    return df
 
 
 def filter_fb_data(spark: SparkSession, df: DataFrame, config: Dict):
     fb_data = df.filter(df['app'] == 'FB')
-    fb_avg_time = fb_data.groupBy('user_id').agg(f.avg('time_spent_in_seconds'))
-    fb_query = (
-        fb_avg_time.writeStream.
-        queryName('fb_query')
-        .outputMode('complete')
-        .format('parquet')
-        .option("path", config["output_path"])
-        .start()
+    fb_avg_time = (
+        fb_data
+        .groupBy('user_id')
+        .agg(f.avg('time_spent_in_seconds'))
     )
-    spark.sql("select * from fb_query").toPandas()
+    checkpoint = config.get("checkpoint")
+    fb_query = (
+        fb_avg_time.write
+        .format('parquet')
+        .mode("overwrite")
+        .save(checkpoint)
+        # .option("path", config.get("output_path"))
+    )
 
 
 def run(spark, config, logger):
-    df = extract(spark, config, logger)
+    data = extract(spark, config, logger)
+    df = join_df(spark, data)
     filter_fb_data(spark, df, config)
     logger.info("Pipeline completed")
     return True

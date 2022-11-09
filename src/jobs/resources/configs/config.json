@@ -1,4 +1,5 @@
 {
-  "input_path": "../resources/data/usage_stat.csv",
-  "output_path": "../resources/data/"
+  "input_path": "/spark-streaming/src/jobs/resources/data/usage_stat.csv",
+  "output_path": "/spark-streaming/src/jobs/resources/data/",
+  "checkpoint": "/spark-streaming/src/jobs/resources/data/checkpoint"
 }
